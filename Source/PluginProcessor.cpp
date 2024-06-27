@@ -93,14 +93,8 @@ void BagsComboAudioProcessor::changeProgramName (int index, const juce::String& 
 //==============================================================================
 void BagsComboAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-
-    const int numInputChannels = getTotalNumInputChannels();
-    const int dealyBufferSize = (2 * sampleRate + samplesPerBlock);
-
-    mSampleRate = sampleRate;
-    mDelayBuffer.setSize(numInputChannels, dealyBufferSize);
+    mDelayBuffer.setSize(2, 12000);
+    mDelayBuffer.clear();
 }
 
 void BagsComboAudioProcessor::releaseResources()
@@ -135,84 +129,59 @@ bool BagsComboAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts
 }
 #endif
 
-void BagsComboAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void BagsComboAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDeNormals;
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // clear channelsf
+
+    // clear channels
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    const int bufferLength = buffer.getNumSamples();
-    const int delayBufferLength = mDelayBuffer.getNumSamples();
+    // Apply our delay effect to the new output..
+    applyDelay(buffer, mDelayBuffer, delayTime);
 
-    
-    for (int channel=0; channel < totalNumInputChannels; ++channel)
-    {
-        const float* bufferData = buffer.getReadPointer(channel);
-        const float* delayBufferData = mDelayBuffer.getReadPointer(channel);
-        float* dryBuffer = buffer.getWritePointer(channel);
-
-        fillDelayBuffer(channel, bufferLength, delayBufferLength, bufferData, delayBufferData);
-        getFromDelayBuffer(buffer, channel, bufferLength, delayBufferLength, bufferData, delayBufferData);
-        feedbackDelay(channel, bufferLength, delayBufferLength, dryBuffer);
-    }
-
-    mWritePosition += 513;
-    mWritePosition %= delayBufferLength;
+    // Apply our gain change to the outgoing data..
+    applyGain(buffer, mDelayBuffer, gainLevel);
 }
 
-// Copy data from main buffer to delay buffer
-void BagsComboAudioProcessor::fillDelayBuffer(int channel, const int bufferLength, 
-    const int delayBufferLength, const float* bufferData, const float* delayBufferData)
+void BagsComboAudioProcessor::applyGain(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& delayBuffer, float gain)
 {
-    if (delayBufferLength > bufferLength + mWritePosition)
-    {
-        mDelayBuffer.copyFromWithRamp(channel, mWritePosition, bufferData, bufferLength, 0.8, 0.8);
-    }
-    else {
-        const int bufferRemaining = delayBufferLength - mWritePosition;
-        mDelayBuffer.copyFromWithRamp(channel, mWritePosition, bufferData, bufferRemaining, 0.8, 0.8);
-        mDelayBuffer.copyFromWithRamp(channel, 0, bufferData, bufferLength - bufferRemaining, 0.8, 0.8);
-    }
+    ignoreUnused(delayBuffer);
+
+    for (auto channel = 0; channel < getTotalNumOutputChannels(); ++channel)
+        buffer.applyGain(channel, 0, buffer.getNumSamples(), gain);
 }
 
-
-void BagsComboAudioProcessor::getFromDelayBuffer(juce::AudioBuffer<float>& buffer, int channel, const int bufferLength,
-    const int delayBufferLength, const float* bufferData, const float* delayBufferData) 
+void BagsComboAudioProcessor::applyDelay(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& delayBuffer, float delayLevel)
 {
-    const int readPosition = static_cast<int> (delayBufferLength + mWritePosition - (mSampleRate * delayTime/1000)) % delayBufferLength;
-    
-    if (delayBufferLength > bufferLength + readPosition)
-    {
-        buffer.copyFrom(channel, 0, delayBufferData + readPosition, bufferLength);
-    }
-    else {
-        const int bufferRemaining = delayBufferLength - readPosition;
-        buffer.copyFrom(channel, 0, delayBufferData + readPosition, bufferRemaining);
-        buffer.copyFrom(channel, bufferRemaining, delayBufferData, bufferLength - bufferRemaining);
-    }
-}
+    auto numSamples = buffer.getNumSamples();
 
-void BagsComboAudioProcessor::feedbackDelay(int channel, const int bufferLength,
-    const int delayBufferLength, float* dryBuffer) 
-{
-    const float startGain = 0.8;
-    const float endGain = 0.4;
-    
-    if (delayBufferLength > bufferLength + mWritePosition) 
-    {
-        mDelayBuffer.addFromWithRamp(channel, mWritePosition, dryBuffer, bufferLength, startGain, endGain);
-    }
-    else{
-        const int bufferRemaining = delayBufferLength - mWritePosition;
-        mDelayBuffer.addFromWithRamp(channel, bufferRemaining, dryBuffer, bufferRemaining, startGain, endGain);
-        mDelayBuffer.addFromWithRamp(channel, 0, dryBuffer, bufferLength - bufferRemaining, startGain, endGain);
-    }
-}
+    auto delayPos = 0;
 
+    for (auto channel = 0; channel < getTotalNumOutputChannels(); ++channel)
+    {
+        // get write points to main and delay buffers
+        auto channelData = buffer.getWritePointer(channel);
+        auto delayData = delayBuffer.getWritePointer(juce::jmin(channel, delayBuffer.getNumChannels() - 1));
+
+        delayPos = delayPosition;
+
+        for (auto sample = 0; sample < numSamples; ++sample)
+        {
+            auto in = channelData[sample];
+            channelData[sample] += delayData[delayPos];
+            delayData[delayPos] = (delayData[delayPos] + in) * delayLevel;
+
+            if (++delayPos >= delayBuffer.getNumSamples())
+                delayPos = 0;
+        }
+    }
+
+    delayPosition = delayPos;
+}
 
 
 //==============================================================================

@@ -23,19 +23,28 @@ BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor (BagsComboAudioProc
     delayTimeController.setSliderStyle(juce::Slider::SliderStyle::Rotary);
     delayTimeController.setTextBoxStyle(juce::Slider::TextBoxAbove,false, 50, 20);
     delayTimeController.setSize(100,100);
-    delayTimeController.setRange (0.0, 1000.0, 50.0);
-    delayTimeController.setValue (400.0);
+    delayTimeController.setRange (0.0, 1.0, 0.01);
+    //delayTimeController.setRange(0.0, 1000.0, 50.0);
+    //delayTimeController.setValue (400.0);
 
     delayTimeController.setTooltip("Change Delay Time");
     delayTimeController.setColour(juce::Slider::thumbColourId, juce::Colours::darkblue);
     delayTimeController.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::darkmagenta);
     delayTimeController.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::black);
-    
 
     addAndMakeVisible(delayTimeController);
 
+    gainController.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 50, 20);
+    gainController.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+    gainController.setSize(70, 70);
+    gainController.setRange(0.0, 1.0, 0.01);
+
+    addAndMakeVisible(gainController);
+
     // add the listener to the slider
     delayTimeController.addListener(this);
+    gainController.addListener(this);
+
 }
 
 BagsComboAudioProcessorEditor::~BagsComboAudioProcessorEditor()
@@ -63,5 +72,6 @@ void BagsComboAudioProcessorEditor::resized()
 
 void BagsComboAudioProcessorEditor::sliderValueChanged(juce::Slider* slider) 
 {
-    audioProcessor.delayTime = static_cast<int>(delayTimeController.getValue());
+    audioProcessor.delayTime = static_cast<float>(delayTimeController.getValue());
+    audioProcessor.gainLevel = static_cast<float>(gainController.getValue());
 }

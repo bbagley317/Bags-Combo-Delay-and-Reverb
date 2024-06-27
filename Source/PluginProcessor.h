@@ -13,11 +13,12 @@
 //==============================================================================
 /**
 */
-class BagsComboAudioProcessor  : public juce::AudioProcessor
+class BagsComboAudioProcessor : public juce::AudioProcessor
 {
 
 public:
-    int delayTime{200};
+    float delayTime{ 0.8 };
+    float gainLevel{ 0.8 };
 
 public:
     //==============================================================================
@@ -56,17 +57,16 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
-    void fillDelayBuffer(int channel, const int bufferLength,
-        const int delayBufferLength, const float* bufferData, const float* delatBufferData);
-    void getFromDelayBuffer(juce::AudioBuffer<float>& buffer, int channel, const int bufferLength,
-        const int delayBufferLength, const float* bufferData, const float* delayBufferData);
-    void feedbackDelay(int channel, const int bufferLength, const int delayBufferLength, float* dryBuffer);
+
+
+    void applyDelay(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& delayBuffer, float delayLevel);
+    void applyGain(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& delayBuffer, float gainLevel);
+
 
 private:
     juce::AudioBuffer<float> mDelayBuffer;
-    int mWritePosition{ 0 };
+    int delayPosition{ 0 };
     int mSampleRate{ 44100 };
-
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BagsComboAudioProcessor)
