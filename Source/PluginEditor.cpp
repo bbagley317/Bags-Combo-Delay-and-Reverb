@@ -10,41 +10,33 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor (BagsComboAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProcessor& p)
+    : AudioProcessorEditor(&p), audioProcessor(p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
+    // Set pluggin size
+    setSize(400, 200);
 
-    setSize(200, 200);
-
-    // these define the parameters of our slider object
-    //delayTimeController.setSliderStyle (juce::Slider::RotaryHorizontalDrag);
+    // Define the parameters of delayTimeController slider
     delayTimeController.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    delayTimeController.setTextBoxStyle(juce::Slider::TextBoxAbove,false, 50, 20);
-    delayTimeController.setSize(100,100);
-    delayTimeController.setRange (0.0, 1.0, 0.01);
-    //delayTimeController.setRange(0.0, 1000.0, 50.0);
-    //delayTimeController.setValue (400.0);
+    delayTimeController.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 50, 20);
+    delayTimeController.setRange(0.0, 1.0, 0.01);
+    delayTimeController.setLookAndFeel(&delayLookAndFeel);
+    delayTimeController.setValue(0.25);
 
-    delayTimeController.setTooltip("Change Delay Time");
-    delayTimeController.setColour(juce::Slider::thumbColourId, juce::Colours::darkblue);
-    delayTimeController.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::darkmagenta);
-    delayTimeController.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::black);
-
-    addAndMakeVisible(delayTimeController);
-
+    // Define the parameters of gainController slider
     gainController.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 50, 20);
     gainController.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    gainController.setSize(70, 70);
     gainController.setRange(0.0, 1.0, 0.01);
+    gainController.setLookAndFeel(&reverbLookAndFeel); // temp
 
+
+   // Add and make visible on plugin
+    addAndMakeVisible(delayTimeController);
     addAndMakeVisible(gainController);
 
-    // add the listener to the slider
+    // Add listeners to the sliders
     delayTimeController.addListener(this);
     gainController.addListener(this);
-
 }
 
 BagsComboAudioProcessorEditor::~BagsComboAudioProcessorEditor()
@@ -52,25 +44,26 @@ BagsComboAudioProcessorEditor::~BagsComboAudioProcessorEditor()
 }
 
 //==============================================================================
-void BagsComboAudioProcessorEditor::paint (juce::Graphics& g)
+void BagsComboAudioProcessorEditor::paint(juce::Graphics& g)
 {
-  
-    g.fillAll(juce::Colours::grey);
-    g.setColour(juce::Colours::black);
+    g.fillAll(juce::Colour(0xff313638)); // Dark grey
     g.setFont(15.0f);
-    g.drawFittedText("Delay", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
+    g.setColour(juce::Colours::white);
+    g.drawFittedText("BAGS COMBO DELAY & REVERB", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
 }
 
 void BagsComboAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
-    
-    // sets the position and size of the slider with arguments (x, y, width, height)
-    delayTimeController.setBounds(40, 30, 20, getHeight() - 60);
+    const int border = 20; 
+    const int dialWidth = getWidth() / 2 - border;
+    const int dialHeight = getHeight() - border - 100;
+
+    delayTimeController.setBounds(border, border + 30, dialWidth, dialHeight);
+    gainController.setBounds(border + dialWidth, border + 30, dialWidth, dialHeight);
+
 }
 
-void BagsComboAudioProcessorEditor::sliderValueChanged(juce::Slider* slider) 
+void BagsComboAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
 {
     audioProcessor.delayTime = static_cast<float>(delayTimeController.getValue());
     audioProcessor.gainLevel = static_cast<float>(gainController.getValue());
