@@ -119,6 +119,19 @@ private:
     BagsComboAudioProcessor& audioProcessor;
 
     juce::Slider delayTimeController;
+    juce::Slider d2;
+    juce::Slider d3;
+    juce::Slider d4;
+    juce::Slider d5;
+    juce::Slider d6;
+
+    juce::Slider r1;
+    juce::Slider r2;
+    juce::Slider r3;
+    juce::Slider r4;
+    juce::Slider r5;
+    juce::Slider r6;
+ 
     juce::Slider gainController;
 
     DelayLookAndFeel delayLookAndFeel;
