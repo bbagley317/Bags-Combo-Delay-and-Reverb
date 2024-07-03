@@ -36,7 +36,7 @@ public:
     void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos,
         const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider&) override
     {
-        auto radius = (float)juce::jmin(width / 2, height / 2) - 4.0f;
+        auto radius = (float)juce::jmin(width / 2, height / 2) - 8.0f;
         auto centreX = (float)x + (float)width * 0.5f;
         auto centreY = (float)y + (float)height * 0.5f;
         auto rx = centreX - radius;
@@ -75,7 +75,7 @@ public:
     void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos,
         const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider&) override
     {
-        auto radius = (float)juce::jmin(width / 2, height / 2) - 4.0f;
+        auto radius = (float)juce::jmin(width / 2, height / 2) - 8.0f;
         auto centreX = (float)x + (float)width * 0.5f;
         auto centreY = (float)y + (float)height * 0.5f;
         auto rx = centreX - radius;
@@ -103,6 +103,27 @@ public:
 
 };
 
+class CustomController : public juce::Slider {
+public:
+    CustomController(const juce::String& labelText, juce::LookAndFeel_V4* lookAndFeel)
+    {
+        setSliderStyle(juce::Slider::SliderStyle::Rotary);
+        setLookAndFeel(lookAndFeel);
+        setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+
+        label.setText(labelText, juce::dontSendNotification);
+        label.setJustificationType(juce::Justification::centredBottom);
+        label.attachToComponent(this, false);
+    }
+
+    ~CustomController()
+    {
+        setLookAndFeel(nullptr);
+    }
+
+private:
+    juce::Label label; 
+};
 
 class BagsComboAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Slider::Listener // [2]
 {
@@ -117,26 +138,24 @@ private:
     void sliderValueChanged(juce::Slider* slider) override;
 
     BagsComboAudioProcessor& audioProcessor;
-
-    juce::Slider delayTimeController;
-    juce::Slider d2;
-    juce::Slider d3;
-    juce::Slider d4;
-    juce::Slider d5;
-    juce::Slider d6;
-
-    juce::Slider r1;
-    juce::Slider r2;
-    juce::Slider r3;
-    juce::Slider r4;
-    juce::Slider r5;
-    juce::Slider r6;
- 
-    juce::Slider gainController;
-
     DelayLookAndFeel delayLookAndFeel;
     ReverbLookAndFeel reverbLookAndFeel;
 
+    CustomController delayTimeController{"time", &delayLookAndFeel};
+    CustomController d2 {"d2", & delayLookAndFeel};
+    CustomController d3 {"d3", &delayLookAndFeel };
+    CustomController d4 {"d4", &delayLookAndFeel };
+    CustomController d5 {"d5", &delayLookAndFeel };
+    CustomController d6 {"d6", &delayLookAndFeel };
+                         
+    CustomController r1 {"r1", &reverbLookAndFeel };
+    CustomController r2 {"r2", &reverbLookAndFeel };
+    CustomController r3 {"r3", &reverbLookAndFeel };
+    CustomController r4 {"r4", &reverbLookAndFeel };
+    CustomController r5 {"r5", &reverbLookAndFeel };
+    CustomController r6 {"r6", &reverbLookAndFeel };
+                        
+    CustomController gainController {"Gain", &reverbLookAndFeel};
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BagsComboAudioProcessorEditor)

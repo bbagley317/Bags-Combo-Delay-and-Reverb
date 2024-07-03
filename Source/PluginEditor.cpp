@@ -13,6 +13,7 @@
 BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p)
 {
+
     // Set pluggin size
     setSize(400,300);
 
@@ -22,52 +23,18 @@ BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProce
 
     // Define the parameters of gainController slider
     gainController.setRange(0.0, 1.0, 0.01);
-
-
-    //Set slier styles 
     gainController.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-
-    delayTimeController.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    d2.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    d3.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    d4.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    d5.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    d6.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-
-    r1.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    r2.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    r3.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    r4.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    r5.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    r6.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-
-    // Set look and feel for controllers 
-    gainController.setLookAndFeel(&reverbLookAndFeel); // temp
-
-    delayTimeController.setLookAndFeel(&delayLookAndFeel);
-    d2.setLookAndFeel(&delayLookAndFeel);
-    d3.setLookAndFeel(&delayLookAndFeel);
-    d4.setLookAndFeel(&delayLookAndFeel);
-    d5.setLookAndFeel(&delayLookAndFeel);
-    d6.setLookAndFeel(&delayLookAndFeel);
-
-    r1.setLookAndFeel(&reverbLookAndFeel);
-    r2.setLookAndFeel(&reverbLookAndFeel);
-    r3.setLookAndFeel(&reverbLookAndFeel);
-    r4.setLookAndFeel(&reverbLookAndFeel);
-    r5.setLookAndFeel(&reverbLookAndFeel);
-    r6.setLookAndFeel(&reverbLookAndFeel);
 
 
    // Add controllers and make visible 
+    addAndMakeVisible(gainController);
+
+    addAndMakeVisible(delayTimeController);
     addAndMakeVisible(d2);
     addAndMakeVisible(d3);
     addAndMakeVisible(d4);
     addAndMakeVisible(d5);
     addAndMakeVisible(d6);
-    addAndMakeVisible(delayTimeController);
-
-    addAndMakeVisible(gainController);
 
     addAndMakeVisible(r1);
     addAndMakeVisible(r2);
@@ -76,7 +43,6 @@ BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProce
     addAndMakeVisible(r5);
     addAndMakeVisible(r6);
     
-
     // Add listeners to the sliders
     delayTimeController.addListener(this);
     gainController.addListener(this);
@@ -84,6 +50,20 @@ BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProce
 
 BagsComboAudioProcessorEditor::~BagsComboAudioProcessorEditor()
 {
+    // Reset look and feel when plugin closes
+    gainController.setLookAndFeel(nullptr); 
+    delayTimeController.setLookAndFeel(nullptr);
+    d2.setLookAndFeel(nullptr);
+    d3.setLookAndFeel(nullptr);
+    d4.setLookAndFeel(nullptr);
+    d5.setLookAndFeel(nullptr);
+    d6.setLookAndFeel(nullptr);
+    r1.setLookAndFeel(nullptr);
+    r2.setLookAndFeel(nullptr);
+    r3.setLookAndFeel(nullptr);
+    r4.setLookAndFeel(nullptr);
+    r5.setLookAndFeel(nullptr);
+    r6.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
