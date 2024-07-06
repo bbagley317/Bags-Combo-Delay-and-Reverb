@@ -33,35 +33,6 @@ public:
         setColour(juce::Slider::thumbColourId, juce::Colours::limegreen);
     };
 
-    void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos,
-        const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider&) override
-    {
-        auto radius = (float)juce::jmin(width / 2, height / 2) - 8.0f;
-        auto centreX = (float)x + (float)width * 0.5f;
-        auto centreY = (float)y + (float)height * 0.5f;
-        auto rx = centreX - radius;
-        auto ry = centreY - radius;
-        auto rw = radius * 2.0f;
-        auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-
-        g.setColour(juce::Colour(0xff313638)); // Dark Grey
-        g.fillEllipse(rx, ry, rw, rw);
-
-        // outline
-        g.setColour(juce::Colour(0xff35ff69)); // Bright Green
-        g.drawEllipse(rx, ry, rw, rw, 4.0f);
-
-        juce::Path p;
-        auto pointerLength = radius * 0.5f;
-        auto pointerThickness = 8.0f;
-        p.addRectangle(-pointerThickness * 0.5f, -radius, pointerThickness, pointerLength);
-        p.applyTransform(juce::AffineTransform::rotation(angle).translated(centreX, centreY));
-
-        // pointer
-        g.setColour(juce::Colour(0xff35ff69)); // Bright Green
-        g.fillPath(p);
-    }
-
 };
 
 // LookAndFeel class for reverb controls
@@ -72,40 +43,16 @@ public:
         setColour(juce::Slider::thumbColourId, juce::Colour(0xff23B5D3)); // Bright Blue
     };
 
-    void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos,
-        const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider&) override
-    {
-        auto radius = (float)juce::jmin(width / 2, height / 2) - 8.0f;
-        auto centreX = (float)x + (float)width * 0.5f;
-        auto centreY = (float)y + (float)height * 0.5f;
-        auto rx = centreX - radius;
-        auto ry = centreY - radius;
-        auto rw = radius * 2.0f;
-        auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-
-        g.setColour(juce::Colour(0xff313638)); // Dark Grey
-        g.fillEllipse(rx, ry, rw, rw);
-
-        // outline
-        g.setColour(juce::Colour(0xff23B5D3)); // Bright Blue
-        g.drawEllipse(rx, ry, rw, rw, 4.0f);
-
-        juce::Path p;
-        auto pointerLength = radius * 0.5f;
-        auto pointerThickness = 8.0f;
-        p.addRectangle(-pointerThickness * 0.5f, -radius, pointerThickness, pointerLength);
-        p.applyTransform(juce::AffineTransform::rotation(angle).translated(centreX, centreY));
-
-        // pointer
-        g.setColour(juce::Colour(0xff23B5D3)); // Bright Blue
-        g.fillPath(p);
-    }
-
 };
+
+
+
 
 class CustomController : public juce::Slider {
 public:
     CustomController(const juce::String& labelText, juce::LookAndFeel_V4* lookAndFeel)
+      : rotaryStartAngle(juce::MathConstants<float>::pi * 1.2f),
+        rotaryEndAngle(juce::MathConstants<float>::pi * 2.8f)
     {
         setSliderStyle(juce::Slider::SliderStyle::Rotary);
         setLookAndFeel(lookAndFeel);
@@ -113,7 +60,8 @@ public:
 
         label.setText(labelText, juce::dontSendNotification);
         label.setJustificationType(juce::Justification::centredBottom);
-        label.attachToComponent(this, false);
+        label.attachToComponent(this,false); 
+
     }
 
     ~CustomController()
@@ -121,8 +69,38 @@ public:
         setLookAndFeel(nullptr);
     }
 
+    void paint(juce::Graphics& g) override {
+        auto radius = (float)juce::jmin(getWidth() / 2, getHeight() / 2) - 8.0f;
+        auto centreX = (float)getWidth() * 0.5f;
+        auto centreY = (float)getHeight() * 0.5f;
+        auto rx = centreX - radius;
+        auto ry = centreY - radius;
+        auto rw = radius * 2.0f;
+        float sliderPos = (float)(getValue() - getMinimum()) / (float)(getMaximum() - getMinimum());
+        auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
+
+        g.setColour(juce::Colour(0xff313638)); // Dark Grey
+        g.fillEllipse(rx, ry, rw, rw);
+
+        // outline
+        g.setColour(findColour(juce::Slider::thumbColourId)); // Use thumb colour
+        g.drawEllipse(rx, ry, rw, rw, 4.0f);
+
+        juce::Path p;
+        auto pointerLength = radius * 0.6f;
+        auto pointerThickness = 8.0f;
+
+        p.addRectangle(-pointerThickness * 0.5f, -radius, pointerThickness, pointerLength);
+        p.applyTransform(juce::AffineTransform::rotation(angle).translated(centreX, centreY));
+
+        // pointer
+        g.fillPath(p);
+    }
+
 private:
-    juce::Label label; 
+    float rotaryStartAngle;
+    float rotaryEndAngle;
+    juce::Label label;
 };
 
 class BagsComboAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Slider::Listener // [2]
