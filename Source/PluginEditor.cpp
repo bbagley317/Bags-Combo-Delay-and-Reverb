@@ -10,58 +10,127 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor (BagsComboAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProcessor& p)
+    : AudioProcessorEditor(&p), audioProcessor(p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
 
-    setSize(200, 200);
+    // Set pluggin size
+    setSize(400,300);
 
-    // these define the parameters of our slider object
-    //delayTimeController.setSliderStyle (juce::Slider::RotaryHorizontalDrag);
-    delayTimeController.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    delayTimeController.setTextBoxStyle(juce::Slider::TextBoxAbove,false, 50, 20);
-    delayTimeController.setSize(100,100);
-    delayTimeController.setRange (0.0, 1000.0, 50.0);
-    delayTimeController.setValue (400.0);
+    // Define the parameters of delayTimeController slider
+    delayTimeController.setRange(0.0, 1.0, 0.01);
+    delayTimeController.setValue(0.25);
 
-    delayTimeController.setTooltip("Change Delay Time");
-    delayTimeController.setColour(juce::Slider::thumbColourId, juce::Colours::darkblue);
-    delayTimeController.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::darkmagenta);
-    delayTimeController.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::black);
-    
+    // Define the parameters of gainController slider
+    gainController.setRange(0.0, 1.0, 0.01);
+    gainController.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+
+
+   // Add controllers and make visible 
+    addAndMakeVisible(gainController);
 
     addAndMakeVisible(delayTimeController);
+    addAndMakeVisible(d2);
+    addAndMakeVisible(d3);
+    addAndMakeVisible(d4);
+    addAndMakeVisible(d5);
+    addAndMakeVisible(d6);
 
-    // add the listener to the slider
+    addAndMakeVisible(r1);
+    addAndMakeVisible(r2);
+    addAndMakeVisible(r3);
+    addAndMakeVisible(r4);
+    addAndMakeVisible(r5);
+    addAndMakeVisible(r6);
+    
+    // Add listeners to the sliders
     delayTimeController.addListener(this);
+    gainController.addListener(this);
 }
 
 BagsComboAudioProcessorEditor::~BagsComboAudioProcessorEditor()
 {
+    // Reset look and feel when plugin closes
+    gainController.setLookAndFeel(nullptr); 
+    delayTimeController.setLookAndFeel(nullptr);
+    d2.setLookAndFeel(nullptr);
+    d3.setLookAndFeel(nullptr);
+    d4.setLookAndFeel(nullptr);
+    d5.setLookAndFeel(nullptr);
+    d6.setLookAndFeel(nullptr);
+    r1.setLookAndFeel(nullptr);
+    r2.setLookAndFeel(nullptr);
+    r3.setLookAndFeel(nullptr);
+    r4.setLookAndFeel(nullptr);
+    r5.setLookAndFeel(nullptr);
+    r6.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
-void BagsComboAudioProcessorEditor::paint (juce::Graphics& g)
+void BagsComboAudioProcessorEditor::paint(juce::Graphics& g)
 {
-  
-    g.fillAll(juce::Colours::grey);
-    g.setColour(juce::Colours::black);
+    g.fillAll(juce::Colour(0xff313638)); // Dark grey
     g.setFont(15.0f);
-    g.drawFittedText("Delay", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
+    g.setColour(juce::Colours::white);
+    g.drawFittedText("BAGS COMBO DELAY & REVERB", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
+    
+    const int border = 20;
+    const int padding = 5;
+
+    // Proportional to plugin width = 400, height = 300
+    const int dialWidth = (getWidth() / 8);
+    const int dialHeight = (getHeight() / 6);
+
+    // Draw boxes around the dials
+    const int headerHeight = 50;
+    const int boxWidth = 3 * dialWidth + 2 * padding;
+    const int boxHeight = 2 * dialHeight + 7 * padding;
+
+    g.drawRect(border - padding, border + headerHeight - 4*padding, boxWidth + 2 * padding, boxHeight + 2 * padding);
+    g.drawRect(getWidth() / 2 + border - padding, border + headerHeight - 4*padding, boxWidth + 2 * padding, boxHeight + 2 * padding);
+    
+    // Draw labels above the boxes
+    g.drawFittedText("DELAY", border, border + padding , boxWidth + 2 * padding, 30, juce::Justification::centred, 1);
+    g.drawFittedText("REVERB", getWidth() / 2 + border, border + padding, boxWidth + 2 * padding, 30, juce::Justification::centred, 1);
+
 }
 
 void BagsComboAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
-    
-    // sets the position and size of the slider with arguments (x, y, width, height)
-    delayTimeController.setBounds(40, 30, 20, getHeight() - 60);
+    const int border = 20;
+    const int padding = 5;
+    const int headerHeight = 50;
+
+    // Proportional to plugin width = 400, height = 300
+    const int dialWidth = (getWidth() / 8); 
+    const int dialHeight = (getHeight() / 6); 
+
+    // Arrange delay controllers in 3 by 2 grid on the left
+    delayTimeController.setBounds(border, border + headerHeight, dialWidth, dialHeight);
+    d2.setBounds(border + dialWidth + padding, border + headerHeight, dialWidth, dialHeight);
+    d3.setBounds(border + 2 * (dialWidth + padding), border + headerHeight, dialWidth, dialHeight);
+    d4.setBounds(border, border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
+    d5.setBounds(border + dialWidth + padding, border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
+    d6.setBounds(border + 2 * (dialWidth + padding), border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
+
+    // Arrange reverb controllers in 3 by 2 grid on the right
+    const int rightBorder = getWidth() / 2 + border;
+    r1.setBounds(rightBorder, border + headerHeight, dialWidth, dialHeight);
+    r2.setBounds(rightBorder + dialWidth + padding, border + headerHeight, dialWidth, dialHeight);
+    r3.setBounds(rightBorder + 2 * (dialWidth + padding), border + headerHeight, dialWidth, dialHeight);
+    r4.setBounds(rightBorder, border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
+    r5.setBounds(rightBorder + dialWidth + padding, border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
+    r6.setBounds(rightBorder + 2 * (dialWidth + padding), border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
+
+    // Arrange gain controller below the grid in the center
+    gainController.setBounds((getWidth() - dialWidth) / 2, getHeight() - border - dialHeight, dialWidth, dialHeight);
 }
 
-void BagsComboAudioProcessorEditor::sliderValueChanged(juce::Slider* slider) 
+
+void BagsComboAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
 {
-    audioProcessor.delayTime = static_cast<int>(delayTimeController.getValue());
+    audioProcessor.delayTime = static_cast<float>(delayTimeController.getValue());
+    audioProcessor.gainLevel = static_cast<float>(gainController.getValue());
 }
+
+
