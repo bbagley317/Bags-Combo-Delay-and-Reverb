@@ -119,8 +119,8 @@ private:
     DelayLookAndFeel delayLookAndFeel;
     ReverbLookAndFeel reverbLookAndFeel;
 
-    CustomController delayTimeController{"time", &delayLookAndFeel};
-    CustomController d2 {"d2", & delayLookAndFeel};
+    CustomController delayLevelController{"level", &delayLookAndFeel};
+    CustomController delayTimeController {"time", & delayLookAndFeel};
     CustomController d3 {"d3", &delayLookAndFeel };
     CustomController d4 {"d4", &delayLookAndFeel };
     CustomController d5 {"d5", &delayLookAndFeel };
@@ -133,7 +133,7 @@ private:
     CustomController r5 {"r5", &reverbLookAndFeel };
     CustomController r6 {"r6", &reverbLookAndFeel };
                         
-    CustomController gainController {"Gain", &reverbLookAndFeel};
+    CustomController gainController {"gain", &reverbLookAndFeel};
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BagsComboAudioProcessorEditor)

@@ -93,7 +93,7 @@ void BagsComboAudioProcessor::changeProgramName (int index, const juce::String& 
 //==============================================================================
 void BagsComboAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    mDelayBuffer.setSize(2, 12000);
+    mDelayBuffer.setSize(2, 2*mSampleRate);
     mDelayBuffer.clear();
 }
 
@@ -141,7 +141,7 @@ void BagsComboAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
         buffer.clear(i, 0, buffer.getNumSamples());
 
     // Apply our delay effect to the new output..
-    applyDelay(buffer, mDelayBuffer, delayTime);
+    applyDelay(buffer, mDelayBuffer, delayLevel, delayTime);
 
     // Apply our gain change to the outgoing data..
     applyGain(buffer, mDelayBuffer, gainLevel);
@@ -155,32 +155,39 @@ void BagsComboAudioProcessor::applyGain(juce::AudioBuffer<float>& buffer, juce::
         buffer.applyGain(channel, 0, buffer.getNumSamples(), gain);
 }
 
-void BagsComboAudioProcessor::applyDelay(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& delayBuffer, float delayLevel)
+void BagsComboAudioProcessor::applyDelay(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& delayBuffer, float delayLevel, float delayTime)
 {
     auto numSamples = buffer.getNumSamples();
+    auto sampleRate = getSampleRate(); 
 
-    auto delayPos = 0;
+    int delayWritePos = mDelayPosition; // Initialize delay write position
 
     for (auto channel = 0; channel < getTotalNumOutputChannels(); ++channel)
     {
-        // get write points to main and delay buffers
         auto channelData = buffer.getWritePointer(channel);
         auto delayData = delayBuffer.getWritePointer(juce::jmin(channel, delayBuffer.getNumChannels() - 1));
 
-        delayPos = delayPosition;
+        delayWritePos = mDelayPosition;
 
         for (auto sample = 0; sample < numSamples; ++sample)
         {
-            auto in = channelData[sample];
-            channelData[sample] += delayData[delayPos];
-            delayData[delayPos] = (delayData[delayPos] + in) * delayLevel;
+            // Convert delay time from milliseconds to samples
+            int delaySamples = static_cast<int>(delayTime / 1000 * mSampleRate);
 
-            if (++delayPos >= delayBuffer.getNumSamples())
-                delayPos = 0;
+            // Calculate the position in the delay buffer considering the delay time
+            int delayReadPos = (delayWritePos + delayBuffer.getNumSamples() - delaySamples) % delayBuffer.getNumSamples();
+
+
+            auto in = channelData[sample];                               // get original sample
+            channelData[sample] += delayData[delayReadPos] * delayLevel; // add effects to delay sample and add to main buffer
+            delayData[delayWritePos] = (channelData[sample]);            // add main buffer sample to delay buffer
+
+            if (++delayWritePos >= delayBuffer.getNumSamples())
+                delayWritePos = 0;
         }
     }
 
-    delayPosition = delayPos;
+    mDelayPosition = delayWritePos;
 }
 
 

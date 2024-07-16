@@ -17,9 +17,12 @@ BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProce
     // Set pluggin size
     setSize(400,300);
 
-    // Define the parameters of delayTimeController slider
-    delayTimeController.setRange(0.0, 1.0, 0.01);
-    delayTimeController.setValue(0.25);
+    // Define the parameters of delayLevelController slider
+    delayLevelController.setRange(0.0, 1.0, 0.01);
+    delayLevelController.setValue(0.25);
+
+    delayTimeController.setRange(0.0, 1000.0, 1.0);
+    delayTimeController.showTextBox();
 
     // Define the parameters of gainController slider
     gainController.setRange(0.0, 1.0, 0.01);
@@ -29,8 +32,8 @@ BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProce
    // Add controllers and make visible 
     addAndMakeVisible(gainController);
 
+    addAndMakeVisible(delayLevelController);
     addAndMakeVisible(delayTimeController);
-    addAndMakeVisible(d2);
     addAndMakeVisible(d3);
     addAndMakeVisible(d4);
     addAndMakeVisible(d5);
@@ -44,6 +47,7 @@ BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProce
     addAndMakeVisible(r6);
     
     // Add listeners to the sliders
+    delayLevelController.addListener(this);
     delayTimeController.addListener(this);
     gainController.addListener(this);
 }
@@ -52,8 +56,8 @@ BagsComboAudioProcessorEditor::~BagsComboAudioProcessorEditor()
 {
     // Reset look and feel when plugin closes
     gainController.setLookAndFeel(nullptr); 
+    delayLevelController.setLookAndFeel(nullptr);
     delayTimeController.setLookAndFeel(nullptr);
-    d2.setLookAndFeel(nullptr);
     d3.setLookAndFeel(nullptr);
     d4.setLookAndFeel(nullptr);
     d5.setLookAndFeel(nullptr);
@@ -106,8 +110,8 @@ void BagsComboAudioProcessorEditor::resized()
     const int dialHeight = (getHeight() / 6); 
 
     // Arrange delay controllers in 3 by 2 grid on the left
-    delayTimeController.setBounds(border, border + headerHeight, dialWidth, dialHeight);
-    d2.setBounds(border + dialWidth + padding, border + headerHeight, dialWidth, dialHeight);
+    delayLevelController.setBounds(border, border + headerHeight, dialWidth, dialHeight);
+    delayTimeController.setBounds(border + dialWidth + padding, border + headerHeight, dialWidth, dialHeight);
     d3.setBounds(border + 2 * (dialWidth + padding), border + headerHeight, dialWidth, dialHeight);
     d4.setBounds(border, border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
     d5.setBounds(border + dialWidth + padding, border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
@@ -129,8 +133,11 @@ void BagsComboAudioProcessorEditor::resized()
 
 void BagsComboAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
 {
+    audioProcessor.delayLevel = static_cast<float>(delayLevelController.getValue());
     audioProcessor.delayTime = static_cast<float>(delayTimeController.getValue());
     audioProcessor.gainLevel = static_cast<float>(gainController.getValue());
+   
+
 }
 
 
