@@ -126,11 +126,11 @@ private:
     CustomController d5 {"d5", &delayLookAndFeel };
     CustomController d6 {"d6", &delayLookAndFeel };
                          
-    CustomController r1 {"r1", &reverbLookAndFeel };
-    CustomController r2 {"r2", &reverbLookAndFeel };
-    CustomController r3 {"r3", &reverbLookAndFeel };
-    CustomController r4 {"r4", &reverbLookAndFeel };
-    CustomController r5 {"r5", &reverbLookAndFeel };
+    CustomController roomSizeController {"size", &reverbLookAndFeel };
+    CustomController dampController {"damp", &reverbLookAndFeel };
+    CustomController widthController {"width", &reverbLookAndFeel };
+    CustomController wetLevelController {"wet", &reverbLookAndFeel };
+    CustomController dryLevelController {"dry", &reverbLookAndFeel };
     CustomController r6 {"r6", &reverbLookAndFeel };
                         
     CustomController gainController {"gain", &reverbLookAndFeel};

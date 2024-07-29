@@ -24,6 +24,21 @@ BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProce
     delayTimeController.setRange(0.0, 1000.0, 1.0);
     delayTimeController.showTextBox();
 
+    roomSizeController.setRange(0.0, 1.0, 0.05);
+    roomSizeController.setValue(0.5);
+
+    widthController.setRange(0.0, 1.0, 0.05);
+    widthController.setValue(0.5);
+
+    dampController.setRange(0.0, 1.0, 0.05);
+    dampController.setValue(0.25);
+
+    wetLevelController.setRange(0.0, 1.0, 0.05);
+    wetLevelController.setValue(0.33);
+
+    dryLevelController.setRange(0.0, 1.0, 0.05);
+    dryLevelController.setValue(0.4);
+
     // Define the parameters of gainController slider
     gainController.setRange(0.0, 1.0, 0.01);
     gainController.setSliderStyle(juce::Slider::SliderStyle::Rotary);
@@ -34,21 +49,29 @@ BagsComboAudioProcessorEditor::BagsComboAudioProcessorEditor(BagsComboAudioProce
 
     addAndMakeVisible(delayLevelController);
     addAndMakeVisible(delayTimeController);
-    addAndMakeVisible(d3);
-    addAndMakeVisible(d4);
-    addAndMakeVisible(d5);
-    addAndMakeVisible(d6);
+    //addAndMakeVisible(d3);
+    //addAndMakeVisible(d4);
+    //addAndMakeVisible(d5);
+    //addAndMakeVisible(d6);
 
-    addAndMakeVisible(r1);
-    addAndMakeVisible(r2);
-    addAndMakeVisible(r3);
-    addAndMakeVisible(r4);
-    addAndMakeVisible(r5);
-    addAndMakeVisible(r6);
+    addAndMakeVisible(roomSizeController);
+    addAndMakeVisible(widthController);
+    addAndMakeVisible(dampController);
+    addAndMakeVisible(wetLevelController);
+    addAndMakeVisible(dryLevelController);
+    //addAndMakeVisible(r6);
     
     // Add listeners to the sliders
     delayLevelController.addListener(this);
     delayTimeController.addListener(this);
+    
+    roomSizeController.addListener(this);
+    widthController.addListener(this);
+    dampController.addListener(this);
+    wetLevelController.addListener(this);
+    dryLevelController.addListener(this);
+
+
     gainController.addListener(this);
 }
 
@@ -62,11 +85,12 @@ BagsComboAudioProcessorEditor::~BagsComboAudioProcessorEditor()
     d4.setLookAndFeel(nullptr);
     d5.setLookAndFeel(nullptr);
     d6.setLookAndFeel(nullptr);
-    r1.setLookAndFeel(nullptr);
-    r2.setLookAndFeel(nullptr);
-    r3.setLookAndFeel(nullptr);
-    r4.setLookAndFeel(nullptr);
-    r5.setLookAndFeel(nullptr);
+
+    roomSizeController.setLookAndFeel(nullptr);
+    widthController.setLookAndFeel(nullptr);
+    dampController.setLookAndFeel(nullptr);
+    wetLevelController.setLookAndFeel(nullptr);
+    dryLevelController.setLookAndFeel(nullptr);
     r6.setLookAndFeel(nullptr);
 }
 
@@ -119,11 +143,11 @@ void BagsComboAudioProcessorEditor::resized()
 
     // Arrange reverb controllers in 3 by 2 grid on the right
     const int rightBorder = getWidth() / 2 + border;
-    r1.setBounds(rightBorder, border + headerHeight, dialWidth, dialHeight);
-    r2.setBounds(rightBorder + dialWidth + padding, border + headerHeight, dialWidth, dialHeight);
-    r3.setBounds(rightBorder + 2 * (dialWidth + padding), border + headerHeight, dialWidth, dialHeight);
-    r4.setBounds(rightBorder, border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
-    r5.setBounds(rightBorder + dialWidth + padding, border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
+    roomSizeController.setBounds(rightBorder, border + headerHeight, dialWidth, dialHeight);
+    widthController.setBounds(rightBorder + dialWidth + padding, border + headerHeight, dialWidth, dialHeight);
+    dampController.setBounds(rightBorder + 2 * (dialWidth + padding), border + headerHeight, dialWidth, dialHeight);
+    wetLevelController.setBounds(rightBorder, border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
+    dryLevelController.setBounds(rightBorder + dialWidth + padding, border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
     r6.setBounds(rightBorder + 2 * (dialWidth + padding), border + headerHeight + dialHeight + 4*padding, dialWidth, dialHeight);
 
     // Arrange gain controller below the grid in the center
@@ -135,9 +159,15 @@ void BagsComboAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
 {
     audioProcessor.delayLevel = static_cast<float>(delayLevelController.getValue());
     audioProcessor.delayTime = static_cast<float>(delayTimeController.getValue());
-    audioProcessor.gainLevel = static_cast<float>(gainController.getValue());
-   
+    
+    audioProcessor.roomSize = static_cast<float>(roomSizeController.getValue());
+    audioProcessor.width = static_cast<float>(widthController.getValue());
+    audioProcessor.damp = static_cast<float>(dampController.getValue());
+    audioProcessor.wetLevel = static_cast<float>(wetLevelController.getValue());
+    audioProcessor.dryLevel = static_cast<float>(dryLevelController.getValue());
 
+    audioProcessor.gainLevel = static_cast<float>(gainController.getValue());
+    
 }
 
 

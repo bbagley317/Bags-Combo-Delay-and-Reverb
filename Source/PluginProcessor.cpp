@@ -143,8 +143,13 @@ void BagsComboAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
     // Apply our delay effect to the new output..
     applyDelay(buffer, mDelayBuffer, delayLevel, delayTime);
 
+    // Apply reverb effect 
+    applyReverb(buffer, roomSize, width, damp, wetLevel, dryLevel);
+
     // Apply our gain change to the outgoing data..
     applyGain(buffer, mDelayBuffer, gainLevel);
+
+    
 }
 
 void BagsComboAudioProcessor::applyGain(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& delayBuffer, float gain)
@@ -190,6 +195,28 @@ void BagsComboAudioProcessor::applyDelay(juce::AudioBuffer<float>& buffer, juce:
     mDelayPosition = delayWritePos;
 }
 
+
+void BagsComboAudioProcessor::applyReverb(juce::AudioBuffer<float>& buffer, float roomSize, float width, float damp, float wetLevel, float dryLevel)
+{
+    // Set the reverb parameters
+    juce::Reverb::Parameters reverbParameters;
+    reverbParameters.roomSize = roomSize;
+    reverbParameters.damping = damp;
+    reverbParameters.width = width;
+    reverbParameters.wetLevel = wetLevel;
+    reverbParameters.dryLevel = dryLevel;
+    reverb.setParameters(reverbParameters);
+
+
+    // Apply reverb to the audio buffer
+    for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+    {
+        float* channelData = buffer.getWritePointer(channel);
+        reverb.processMono(channelData, buffer.getNumSamples());
+    }
+
+
+}
 
 //==============================================================================
 bool BagsComboAudioProcessor::hasEditor() const

@@ -17,8 +17,15 @@ class BagsComboAudioProcessor : public juce::AudioProcessor
 {
 
 public:
-    float delayLevel{ 0.8 };
-    float delayTime{ 10.0 };
+    float delayLevel { 0.8 };
+    float delayTime { 10.0 };
+
+    float roomSize { 0.5 };
+    float width { 0.5 };
+    float damp { 0.5 };
+    float wetLevel { 0.33 };
+    float dryLevel{ 0.4 };
+
     float gainLevel{ 0.8 };
 
 public:
@@ -62,11 +69,14 @@ public:
 
     void applyDelay(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& delayBuffer, float delayLevel, float delayTime);
     void applyGain(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& delayBuffer, float gainLevel);
+    void applyReverb(juce::AudioBuffer<float>& buffer, float roomSize, float damping, float width, float wetLevel, float dryLevel);
+
 
 
 private:
     juce::AudioBuffer<float> mDelayBuffer;
     int mDelayPosition{ 0 };
+    juce::Reverb reverb;
     int mSampleRate{ 44100 };
 
     //==============================================================================
